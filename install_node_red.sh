@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
 { # this ensures the entire script is downloaded #
-# All commands expected to be run as normal user to take advantage of latest node in ec2-user
+# All commands expected to be run as normal user to take advantage of latest node version in ec2-user account
+# provided by Cloud9
 
+nodered_install() {
+# Function not indented to preserve multiline "cat" and "echo" statements
 set -e
 
 echo "******************** Installing Node-RED and Virtual Drink Dispenser ********************"
@@ -152,6 +155,15 @@ echo "
                         Password is: $NODEPW"
 echo
 echo
+}
 
+# BEGIN interpret - above is called only if script is executed on a Cloud9 instance
+
+if [ -z "C9_PROJECT" ]
+then
+    nodered_install
+else
+    echo "Installation only works from AWS Cloud9 Instance"
+fi
 
 } # this ensures the entire script is downloaded #
