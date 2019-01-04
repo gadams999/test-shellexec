@@ -5,19 +5,32 @@
 
 set -e
 
-sudo yum install pwgen -y
-npm install -g node-red
-npm install -g node-red-admin
-npm install -g node-red-dashboard
-npm install -g bcryptjs-cli
+echo "*********************** Installing Node-RED and Virtual Drink Dispenser ***********************"
 
-openssl genrsa -out /home/ec2-user/node-key.pem 2048
-openssl req -new -sha256 -key /home/ec2-user/node-key.pem -out /home/ec2-user/node.csr -subj "/C=US/ST=Washington/L=Seattle/CN=workshop-self-signed"
-openssl x509 -req -in /home/ec2-user/node.csr -signkey /home/ec2-user/node-key.pem -out /home/ec2-user/node-cert.pem
+echo "Installing operating system dependencies"
+sudo yum install pwgen -y -q
+
+echo "Installing NPM modules"
+echo
+echo "Installing NPM module Node-RED..."
+npm set progress=false && npm install -g node-red --silent > "/dev/null" 2>&1
+echo "Installing NPM module Node-RED administration..."
+npm set progress=false && npm install -g node-red-admin --silent > "/dev/null" 2>&1
+echo "Installing NPM module Node-RED dashboard..."
+npm set progress=false && npm install -g node-red-dashboard --silent > "/dev/null" 2>&1
+echo "Installing NPM module bcrypt..."
+npm set progress=false && npm install -g bcryptjs-cli --silent > "/dev/null" 2>&1
+
+echo
+echo "Generating self-signed certificate for HTTPS..."
+openssl genrsa -out /home/ec2-user/node-key.pem 2048 > "/dev/null" 2>&1
+openssl req -new -sha256 -key /home/ec2-user/node-key.pem -out /home/ec2-user/node.csr -subj "/C=US/ST=Washington/L=Seattle/CN=workshop-self-signed" > "/dev/null" 2>&1
+openssl x509 -req -in /home/ec2-user/node.csr -signkey /home/ec2-user/node-key.pem -out /home/ec2-user/node-cert.pem > "/dev/null" 2>&1
 
 /usr/bin/install -d -o ec2-user -g ec2-user -m 755 /home/ec2-user/.node-red
 
 # TODO: replace with URLs from GitHub
+echo "Copying template file for Node-RED and Virtual Drink Dispenser..."
 /usr/bin/curl https://raw.githubusercontent.com/gadams999/test-shellexec/master/settings.js > /home/ec2-user/.node-red/settings.js
 /usr/bin/curl https://raw.githubusercontent.com/gadams999/test-shellexec/master/virtual_dispenser.json > /home/ec2-user/.node-red/virtual_dispenser.json
 
@@ -29,7 +42,8 @@ MY_IP=$(curl -s ifconfig.co)
 
 
 # Install supervisor
-sudo pip install supervisor
+echo "Installing supervisord and setting Node-RED to auto-start..."
+sudo pip install -q supervisor
 sudo sh -c '/usr/local/bin/echo_supervisord_conf > /etc/supervisord.conf'
 # Append config for node-red
 sudo sh -c 'cat << EOF >> /etc/supervisord.conf
@@ -116,14 +130,21 @@ sudo chkconfig supervisor on
 
 # Map 443 to 1880 (Node-RED port running HTTPS)
 # Add inbound for port 443 to the default security group on Cloud9
+echo "Creating iptables/security group entries to allow in port 443 to Node-RED..."
 sudo /sbin/iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 1880
 sudo /etc/init.d/iptables save
 aws ec2 authorize-security-group-ingress --group-name $(curl -s http://169.254.169.254/latest/meta-data/security-groups) --protocol tcp --port 443 --cidr 0.0.0.0/0
 
-echo "************* Copy and save these settings *************
-                   Node-RED URL is: https://$MY_IP
-                   Username is: admin
-                   Password is: $NODEPW"
+echo
+echo
+echo
+echo
+echo "*********************** Copy and save these settings ***********************
+                        Node-RED URL is: https://$MY_IP
+                        Username is: admin
+                        Password is: $NODEPW"
+echo
+echo
 
 # Start service for first time interactive launch
 # This will start Node-RED and load the virtual dispenser flows
