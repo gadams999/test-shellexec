@@ -159,7 +159,7 @@ echo
 
 # BEGIN interpret - above is called only if script is executed on a Cloud9 instance
 
-if [ -z "C9_PROJECT" ]
+if [ -n "$C9_PROJECT" ]
 then
     nodered_install
 else
