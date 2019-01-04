@@ -17,12 +17,9 @@ openssl x509 -req -in /home/ec2-user/node.csr -signkey /home/ec2-user/node-key.p
 
 /usr/bin/install -d -o ec2-user -g ec2-user -m 755 /home/ec2-user/.node-red
 
-# replace with URLs from GitHub
-#curl get settings.json to /home/ec2-user/.node-red/settings.json
-#/usr/bin/curl https://s3.amazonaws.com/iotimmersiondaycontent/hol_files/hol_iot_connect_device.json > /home/ec2-user/.node-red/flows_nodered.json
-
-cp /home/ec2-user/settings.js /home/ec2-user/.node-red/settings.js
-cp /home/ec2-user/virtual_dispenser.json /home/ec2-user/.node-red/virtual_dispenser.json
+# TODO: replace with URLs from GitHub
+/usr/bin/curl https://github.com/gadams999/test-shellexec/blob/master/settings.js > /home/ec2-user/.node-red/settings.js
+/usr/bin/curl https://github.com/gadams999/test-shellexec/blob/master/virtual_dispenser.json > /home/ec2-user/.node-red/virtual_dispenser.json
 
 # modify the settings file with a new password
 NODEPW=`shuf -n1 /usr/share/dict/words | tr -d '\n'`
