@@ -1,0 +1,628 @@
+[
+    {
+        "id": "85a1b4ef.a47ce8",
+        "type": "tab",
+        "label": "Virtual Drink Dispenser",
+        "disabled": false,
+        "info": "This flow mimics the capabilities of a physical drink dispenser. It uses the Node-RED flow logic to present a Dashboard that shows the hardware and ESP32 values."
+    },
+    {
+        "id": "eab0d7e8.e6a188",
+        "type": "ui_button",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Button 1",
+        "group": "c79a21e3.2ea0f",
+        "order": 4,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Btn 1",
+        "tooltip": "Programmed to trigger local dispense action",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "topic": "",
+        "x": 240,
+        "y": 320,
+        "wires": [
+            [
+                "b18f3fb9.96ec4"
+            ]
+        ]
+    },
+    {
+        "id": "bd8cb3fc.6aebc",
+        "type": "ui_button",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Reset",
+        "group": "c79a21e3.2ea0f",
+        "order": 5,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Reset",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "topic": "",
+        "x": 250,
+        "y": 280,
+        "wires": [
+            [
+                "3eb4fa81.f73226"
+            ]
+        ]
+    },
+    {
+        "id": "8b2025b8.adb408",
+        "type": "comment",
+        "z": "85a1b4ef.a47ce8",
+        "name": "initialize - done once during power on or reset",
+        "info": "When Node RED first starts the *Flow init* input will set the various components. A second input can be recieved by the *Reset* button which performs the same operations.\n\nthe following steps are performed:\n\n- Set default variables to the following:\n  - **power_on** - false (motor acutation indication off)\n  - **duration** - 2 (two seconds)\n  - **led** - false (neopixel LED in off state)\n  - **start_time** - current time epoch\n- Turn off on-board LED",
+        "x": 230,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "f50e1387.502f5",
+        "type": "inject",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Flow init",
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "x": 140,
+        "y": 80,
+        "wires": [
+            [
+                "3eb4fa81.f73226"
+            ]
+        ]
+    },
+    {
+        "id": "3eb4fa81.f73226",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Initialize ESP32",
+        "func": "// Set global values needed for tracking state and define init state\nconsole.log('resetting ESP32 state');\n\n// Set start time of device and that it is in an initialze state\nvar timestamp = Date.now();\nglobal.set('start_time', timestamp);\nglobal.set('init_state', true);\n\n// These are default values, overwritten by shadow values if it exists\nglobal.set('duration', 2);\n\n// Push blank document to get shadow to process desired values and set initial reported values\nmsg.payload = {};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 580,
+        "y": 80,
+        "wires": [
+            [
+                "de97a86f.82f858"
+            ]
+        ]
+    },
+    {
+        "id": "b7fcb82.7f0ed48",
+        "type": "comment",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Main Loop - updates dashboard values every second",
+        "info": "",
+        "x": 260,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "e00b1fab.a05d7",
+        "type": "comment",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Device Buttons (dashboard)",
+        "info": "",
+        "x": 180,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "424c5b53.2fa994",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Event Loop",
+        "func": "// update values that would normally be variables in\n// physical device\n\nvar start_time = global.get('start_time')\nvar now = Date.now()\n\n// uptime   - seconds since deploy or last reset\n// duration - amount of time for motor to actuate\nmsg.payload = {\n    \"uptime\": Math.round((now - start_time)/1000),\n    \"duration\": global.get('duration')\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 290,
+        "y": 700,
+        "wires": [
+            [
+                "644ed05f.8b4fe",
+                "f0a4857c.96c7c8"
+            ]
+        ]
+    },
+    {
+        "id": "f437e2ac.edb6e",
+        "type": "inject",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Tick",
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "x": 130,
+        "y": 700,
+        "wires": [
+            [
+                "424c5b53.2fa994"
+            ]
+        ]
+    },
+    {
+        "id": "644ed05f.8b4fe",
+        "type": "ui_text",
+        "z": "85a1b4ef.a47ce8",
+        "group": "c79a21e3.2ea0f",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "Uptime",
+        "label": "Uptime",
+        "format": "{{msg.payload.uptime}} seconds",
+        "layout": "row-spread",
+        "x": 460,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "71d5e249.c9326c",
+        "type": "mqtt in",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Shadow Get Accepted",
+        "topic": "$aws/things/DISP_ID/shadow/get/accepted",
+        "qos": "0",
+        "broker": "f4a57b11.c43bd8",
+        "x": 560,
+        "y": 140,
+        "wires": [
+            [
+                "5bcc861.ca1f278"
+            ]
+        ]
+    },
+    {
+        "id": "c6ff32f2.99462",
+        "type": "mqtt out",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Get Shadow",
+        "topic": "$aws/things/DISP_ID/shadow/get",
+        "qos": "0",
+        "retain": "",
+        "broker": "f4a57b11.c43bd8",
+        "x": 1170,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "8ebe7c5f.f51b6",
+        "type": "mqtt out",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Update Shadow",
+        "topic": "$aws/things/DISP_ID/shadow/update",
+        "qos": "0",
+        "retain": "",
+        "broker": "f4a57b11.c43bd8",
+        "x": 1460,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "a89babfb.e3d2d8",
+        "type": "mqtt in",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Shadow Update Delta",
+        "topic": "$aws/things/DISP_ID/shadow/update/delta",
+        "qos": "0",
+        "broker": "f4a57b11.c43bd8",
+        "x": 160,
+        "y": 460,
+        "wires": [
+            [
+                "b81db61f.f3e608"
+            ]
+        ]
+    },
+    {
+        "id": "9d6ecb68.14d2c8",
+        "type": "ui_text",
+        "z": "85a1b4ef.a47ce8",
+        "group": "3f21ce90.ab8542",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "NeoPixel LED",
+        "format": "<font color={{msg.color}} ><i class=\"fa fa-circle\" style=\"font-size:24px;\"></i></font>",
+        "layout": "row-spread",
+        "x": 1700,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "285adb99.2c83a4",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Enable/disable NeoPixel LED",
+        "func": "if (msg.led) {\n    console.log('Turning ON NeoPixel LED (green color)');\n    msg.color = 'green';\n} else {\n    console.log('Turning OFF NeoPixel LED (gray/clear color)');\n    msg.color =  'gray';\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1460,
+        "y": 180,
+        "wires": [
+            [
+                "9d6ecb68.14d2c8"
+            ]
+        ]
+    },
+    {
+        "id": "b18f3fb9.96ec4",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Activate motor",
+        "func": "// get duration\nmsg.delay = global.get('duration') * 1000\n// Show motor on\nmsg.motor_led = true\n\nconsole.log('Turning on motor for ', global.get('duration'), ' seconds')\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 640,
+        "y": 320,
+        "wires": [
+            [
+                "43e84ec8.373ee",
+                "7cd302dc.e8b30c"
+            ]
+        ]
+    },
+    {
+        "id": "43e84ec8.373ee",
+        "type": "delay",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Wait duration",
+        "pauseType": "delayv",
+        "timeout": "10",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 830,
+        "y": 360,
+        "wires": [
+            [
+                "6118fd57.5bffa4",
+                "c87eda90.3bc158"
+            ]
+        ]
+    },
+    {
+        "id": "6118fd57.5bffa4",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Deactivate motor",
+        "func": "msg.led = false;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1050,
+        "y": 360,
+        "wires": [
+            [
+                "7cd302dc.e8b30c"
+            ]
+        ]
+    },
+    {
+        "id": "c87eda90.3bc158",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Clear Shadow for motor activation",
+        "func": "// log completion of motor event\nconsole.log('Motor activation complete, turning off motor');\n\n// Set shadow state to show device is no longer activating the motor\nmsg.payload = {\n    \"state\": {\n        \"reported\": {\n            \"power_state\": 0\n        },\n        \"desired\": {\n            \"power_state\": 0\n        }\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1100,
+        "y": 480,
+        "wires": [
+            [
+                "8ebe7c5f.f51b6"
+            ]
+        ]
+    },
+    {
+        "id": "63c46a0d.678d44",
+        "type": "switch",
+        "z": "85a1b4ef.a47ce8",
+        "name": "",
+        "property": "command",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "power_state",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "led",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "duration",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 670,
+        "y": 460,
+        "wires": [
+            [
+                "b18f3fb9.96ec4"
+            ],
+            [
+                "60b8de61.51e85"
+            ],
+            [
+                "9ed760e4.99f86"
+            ]
+        ]
+    },
+    {
+        "id": "b81db61f.f3e608",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Process delta values",
+        "func": "// Parse shadow delta topic\nvar shadow = JSON.parse(msg.payload);\nconsole.log('parsed delta payload: ', shadow);\n// set new object for determining which event to process by switch node\nvar new_msg = {\n    \"payload\": {\n    }\n};\n\n// set values to the desired state (content of delta message)\n// \"includes\" is used to parse the payload string, then set\n// based on the \"obj\" value from JSON parse above\nif (shadow.state.hasOwnProperty('power_state')) {\n    new_msg.payload.power_state = shadow.state.power_state;\n}\nif (shadow.state.hasOwnProperty('duration')) {\n    new_msg.payload.duration = shadow.state.duration;\n}\nif (shadow.state.hasOwnProperty('led')) {\n    new_msg.payload.led = shadow.state.led;\n}\n\nreturn new_msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 380,
+        "y": 460,
+        "wires": [
+            [
+                "8022ba2d.94b3f8"
+            ]
+        ]
+    },
+    {
+        "id": "8022ba2d.94b3f8",
+        "type": "split",
+        "z": "85a1b4ef.a47ce8",
+        "name": "split",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "command",
+        "x": 550,
+        "y": 460,
+        "wires": [
+            [
+                "63c46a0d.678d44"
+            ]
+        ]
+    },
+    {
+        "id": "9ed760e4.99f86",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Change motor duration and clear delta",
+        "func": "global.set('duration', msg.payload)\nconsole.log('chg duration msg is ', msg)\nconsole.log('Set motor duration to new value of ', msg.payload)\n\nmsg.payload = {\n    \"state\": {\n        \"reported\": {\n            \"duration\": msg.payload\n        },\n        \"desired\": {\n            \"duration\": msg.payload\n        }\n    }\n}\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1110,
+        "y": 540,
+        "wires": [
+            [
+                "8ebe7c5f.f51b6"
+            ]
+        ]
+    },
+    {
+        "id": "60b8de61.51e85",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Turn on/off NeoPixel LED and clear delta",
+        "func": "// payload contains true (on) or false (off) for LED status\n\nif (msg.payload) {\n    msg.led = true;\n} else {\n    msg.led = false;\n}\n\nvar payload = {\n    \"state\": {\n        \"reported\": {\n            \"led\": msg.payload\n        },\n        \"desired\": {\n            \"led\": msg.payload\n        }\n    }\n}\nmsg.payload = payload;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1120,
+        "y": 420,
+        "wires": [
+            [
+                "285adb99.2c83a4",
+                "8ebe7c5f.f51b6"
+            ]
+        ]
+    },
+    {
+        "id": "de97a86f.82f858",
+        "type": "delay",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Wait for connection before requesting shaodw",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 880,
+        "y": 80,
+        "wires": [
+            [
+                "c6ff32f2.99462"
+            ]
+        ]
+    },
+    {
+        "id": "5bcc861.ca1f278",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Process shadow and set globals",
+        "func": "// Read desired state for all settings except power_state and adjust\n// virtual dispenser accordingly\n\nif (global.get('init_state')) {\n    // Parse payload (JSON string) then check if desired values exist\n    var shadow = JSON.parse(msg.payload);\n\n    if (shadow.state.desired.hasOwnProperty('duration')) {\n        global.set('duration', shadow.state.desired.duration)\n    }\n\n    if (shadow.state.desired.hasOwnProperty('led')) {\n        msg.led = shadow.state.desired.led\n    }\n    // All values set, turn off init_state\n    global.set('init_state', false);\n    // initial set of motor led to make icon appear\n    msg.motor_led = false;\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 880,
+        "y": 160,
+        "wires": [
+            [
+                "285adb99.2c83a4",
+                "7cd302dc.e8b30c"
+            ]
+        ]
+    },
+    {
+        "id": "7cd302dc.e8b30c",
+        "type": "function",
+        "z": "85a1b4ef.a47ce8",
+        "name": "NeoPixel Light Pattern",
+        "func": "// turn on the NeoPixel Pattern LED inidcator to simulate what the\n// dispenser shows while the motor is on.\n\nif (msg.motor_led) {\n    console.log('Turning ON NeoPixel PATTERN LED (blue color)');\n    msg.color = 'blue';\n    msg.test = 'foo';\n    msg.icon = 'fa fa-cog fa-spin fa-fw';\n} else {\n    console.log('Turning OFF NeoPixel PATTERN LED (gray/clear color)');\n    msg.color =  'gray';\n    msg.test = 'bar';\n    msg.icon = 'fa fa-cog';\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1440,
+        "y": 320,
+        "wires": [
+            [
+                "966018da.886f68"
+            ]
+        ]
+    },
+    {
+        "id": "966018da.886f68",
+        "type": "ui_template",
+        "z": "85a1b4ef.a47ce8",
+        "group": "3f21ce90.ab8542",
+        "name": "NeoPixel LED Pattern",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "format": "<style>\n    \n    nr-dashboard-template {\n        padding-left: 0px;\n        padding-right: 0px;\n    }\n</style>\n\n<div layout-align=\"space-between center\" class=\"nr-dashboard-text ng-scope _md layout-row layout-align-space-between-center visible\">\n    <p class=\"label ng-binding\">NeoPixel Pattern (when motor on)</p>\n    <p class=\"value ng-binding\"><font color={{msg.color}}><i class={{msg.icon}}></i></font></p>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": false,
+        "templateScope": "local",
+        "x": 1720,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "560d8cf1.575b94",
+        "type": "comment",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Process incoming delta messages and take action (e.g., activate motor, toggle LED)",
+        "info": "Delta will contain any attributes that differ in Reported to Desired states.",
+        "x": 350,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "e9c5c3be.c0847",
+        "type": "comment",
+        "z": "85a1b4ef.a47ce8",
+        "name": "Dispenser Logic activated by button or from shadow updates",
+        "info": "Updates dashboard with expected results similar to a physical device.",
+        "x": 780,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "f0a4857c.96c7c8",
+        "type": "ui_text",
+        "z": "85a1b4ef.a47ce8",
+        "group": "c79a21e3.2ea0f",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Motor Duration",
+        "label": "Motor Duration",
+        "format": "{{msg.payload.duration}} seconds",
+        "layout": "row-spread",
+        "x": 480,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "c79a21e3.2ea0f",
+        "type": "ui_group",
+        "z": "",
+        "name": "ESP32",
+        "tab": "381577b9.f66918",
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "f4a57b11.c43bd8",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "Drink Dispenser Workshop",
+        "broker": "your_endpoint_here",
+        "port": "8883",
+        "tls": "66d0bf30.6d8",
+        "clientid": "test1",
+        "usetls": true,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "3f21ce90.ab8542",
+        "type": "ui_group",
+        "z": "",
+        "name": "Dispenser Hardware",
+        "tab": "381577b9.f66918",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "381577b9.f66918",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Virtual Drink Dispenser",
+        "icon": "dashboard"
+    },
+    {
+        "id": "66d0bf30.6d8",
+        "type": "tls-config",
+        "z": "",
+        "name": "your credentials",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "certname": "",
+        "keyname": "",
+        "caname": "",
+        "servername": "",
+        "verifyservercert": true
+    }
+]
