@@ -5,7 +5,7 @@
 
 set -e
 
-echo "*********************** Installing Node-RED and Virtual Drink Dispenser ***********************"
+echo "******************** Installing Node-RED and Virtual Drink Dispenser ********************"
 
 echo "Installing operating system dependencies"
 sudo yum install pwgen -y -q
@@ -135,19 +135,23 @@ sudo /sbin/iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT 
 sudo /etc/init.d/iptables save
 aws ec2 authorize-security-group-ingress --group-name $(curl -s http://169.254.169.254/latest/meta-data/security-groups) --protocol tcp --port 443 --cidr 0.0.0.0/0
 
+# Start service for first time interactive launch
+# This will start Node-RED and load the virtual dispenser flows
+echo "Start supervisord which will start Node-RED and the Virtual Drink Dispenser"
+sudo service supervisor start
+
 echo
 echo
 echo
 echo
-echo "*********************** Copy and save these settings ***********************
+echo "********************** Your virtual dispenser is now ready for use **********************"
+echo "***************************** Copy and save these settings ******************************"
+echo "
                         Node-RED URL is: https://$MY_IP
                         Username is: admin
                         Password is: $NODEPW"
 echo
 echo
 
-# Start service for first time interactive launch
-# This will start Node-RED and load the virtual dispenser flows
-sudo service supervisor start
 
 } # this ensures the entire script is downloaded #
