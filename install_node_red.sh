@@ -18,8 +18,8 @@ openssl x509 -req -in /home/ec2-user/node.csr -signkey /home/ec2-user/node-key.p
 /usr/bin/install -d -o ec2-user -g ec2-user -m 755 /home/ec2-user/.node-red
 
 # TODO: replace with URLs from GitHub
-/usr/bin/curl https://github.com/gadams999/test-shellexec/blob/master/settings.js > /home/ec2-user/.node-red/settings.js
-/usr/bin/curl https://github.com/gadams999/test-shellexec/blob/master/virtual_dispenser.json > /home/ec2-user/.node-red/virtual_dispenser.json
+/usr/bin/curl https://raw.githubusercontent.com/gadams999/test-shellexec/master/settings.js > /home/ec2-user/.node-red/settings.js
+/usr/bin/curl https://raw.githubusercontent.com/gadams999/test-shellexec/master/virtual_dispenser.json > /home/ec2-user/.node-red/virtual_dispenser.json
 
 # modify the settings file with a new password
 NODEPW=`shuf -n1 /usr/share/dict/words | tr -d '\n'`
