@@ -7,7 +7,7 @@
 nodered_install() {
 # Function not indented to preserve multiline "cat" and "echo" statements
 set -e
-
+echo "dollar 1: $1"
 disp_id=$1
 
 echo "DISP_ID: $disp_id"
@@ -174,6 +174,8 @@ then
         echo
         echo "No arguments supplied, you must provide the dispenser ID at the end of the curl line"
         exit 1
+    else
+        echo "argumnets: $@"
     fi
     nodered_install $1
 else
