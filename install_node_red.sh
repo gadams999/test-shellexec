@@ -39,7 +39,7 @@ echo "Copying template file for Node-RED and Virtual Drink Dispenser..."
 /usr/bin/curl -s https://raw.githubusercontent.com/gadams999/test-shellexec/master/virtual_dispenser.json > /home/ec2-user/.node-red/virtual_dispenser.json
 
 # Modify flows file with dispenser Id
-/bin/sed i "s/DISP_ID/$disp_id/g" /home/ec2-user/.node-red/virtual_dispenser.json
+/bin/sed -i "s/DISP_ID/$disp_id/g" /home/ec2-user/.node-red/virtual_dispenser.json
 
 # modify the settings file with a new password
 NODEPW=`shuf -n1 /usr/share/dict/words | tr -d '\n'`
