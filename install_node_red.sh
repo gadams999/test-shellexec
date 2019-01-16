@@ -8,6 +8,8 @@ nodered_install() {
 # Function not indented to preserve multiline "cat" and "echo" statements
 set -e
 
+read -p "Enter dispenser ID (e.g., 100): " disp_id
+
 echo "******************** Installing Node-RED and Virtual Drink Dispenser ********************"
 
 echo "Installing operating system dependencies"
@@ -37,6 +39,9 @@ echo "Copying template file for Node-RED and Virtual Drink Dispenser..."
 /usr/bin/curl -s https://raw.githubusercontent.com/gadams999/test-shellexec/master/settings.js > /home/ec2-user/.node-red/settings.js
 /usr/bin/curl -s https://raw.githubusercontent.com/gadams999/test-shellexec/master/virtual_dispenser.json > /home/ec2-user/.node-red/virtual_dispenser.json
 
+# Modify flows file with dispenser Id
+/bin/sed i "s/DISP_ID/$disp_id/g" /home/ec2-user/.node-red/virtual_dispenser.json
+
 # modify the settings file with a new password
 NODEPW=`shuf -n1 /usr/share/dict/words | tr -d '\n'`
 encrypted=$(bcryptjs $NODEPW)
@@ -51,7 +56,7 @@ sudo sh -c '/usr/local/bin/echo_supervisord_conf > /etc/supervisord.conf'
 # Append config for node-red
 sudo sh -c 'cat << EOF >> /etc/supervisord.conf
 [program:nodered]
-command=/home/ec2-user/.nvm/versions/node/v6.15.0/bin/node-red virtual_dispenser.json
+command=$NVM_BIN/node-red virtual_dispenser.json
 directory=/home/ec2-user
 autostart=true
 autorestart=true
@@ -59,7 +64,7 @@ startretries=3
 stderr_logfile=/home/ec2-user/nodered.err.log
 stdout_logfile=/home/ec2-user/nodered.out.log
 user=ec2-user
-environment=HOME="/home/ec2-user",PATH="/home/ec2-user/.nvm/versions/node/v6.15.0/bin:$PATH"
+environment=HOME="/home/ec2-user",PATH="$NVM_BIN:$PATH"
 EOF'
 
 cat << 'EOF' >> supervisor
