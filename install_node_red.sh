@@ -58,7 +58,7 @@ echo "Installing supervisord and setting Node-RED to auto-start..."
 sudo pip install -q supervisor
 sudo sh -c '/usr/local/bin/echo_supervisord_conf > /etc/supervisord.conf'
 # Append config for node-red
-sudo sh -c 'cat << EOF >> /etc/supervisord.conf
+sudo cat << EOF >> /etc/supervisord.conf
 [program:nodered]
 command=$NVM_BIN/node-red virtual_dispenser.json
 directory=/home/ec2-user
@@ -69,7 +69,7 @@ stderr_logfile=/home/ec2-user/nodered.err.log
 stdout_logfile=/home/ec2-user/nodered.out.log
 user=ec2-user
 environment=HOME="/home/ec2-user",PATH="$NVM_BIN:$PATH"
-EOF'
+EOF
 
 cat << 'EOF' >> supervisor
 #!/bin/bash
