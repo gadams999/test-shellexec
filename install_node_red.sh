@@ -8,7 +8,12 @@ nodered_install() {
 # Function not indented to preserve multiline "cat" and "echo" statements
 set -e
 
-read -p "Enter dispenser ID (e.g., 100): " disp_id
+if [ $# -eq 0 ]
+  then
+    echo "No arguments supplied, you must provide the dispenser ID at the end of the curl line"
+    exit 1
+fi
+disp_id = $1
 
 echo "******************** Installing Node-RED and Virtual Drink Dispenser ********************"
 
