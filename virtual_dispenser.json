@@ -313,7 +313,7 @@
         "type": "function",
         "z": "85a1b4ef.a47ce8",
         "name": "Deactivate motor",
-        "func": "msg.led = false;\nreturn msg;",
+        "func": "msg.motor_led = false;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "x": 1050,
