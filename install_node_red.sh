@@ -8,7 +8,7 @@ nodered_install() {
 # Function not indented to preserve multiline "cat" and "echo" statements
 set -e
 echo "dollar 1: $1"
-disp_id=$1
+disp_id="$1"
 
 echo "DISP_ID: $disp_id"
 exit
