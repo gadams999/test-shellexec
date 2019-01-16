@@ -9,6 +9,11 @@ nodered_install() {
 set -e
 disp_id="$1"
 
+echo "Env"
+env
+exit 1
+
+
 echo "******************** Installing Node-RED and Virtual Drink Dispenser ********************"
 
 echo "Installing operating system dependencies"
