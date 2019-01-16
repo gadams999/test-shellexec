@@ -8,11 +8,6 @@ nodered_install() {
 # Function not indented to preserve multiline "cat" and "echo" statements
 set -e
 
-if [ $# -eq 0 ]
-  then
-    echo "No arguments supplied, you must provide the dispenser ID at the end of the curl line"
-    exit 1
-fi
 disp_id = $1
 
 echo "******************** Installing Node-RED and Virtual Drink Dispenser ********************"
@@ -171,7 +166,14 @@ echo
 
 if [ -n "$C9_PROJECT" ]
 then
-    nodered_install
+    if [ $# -eq 0 ]
+    then
+        echo
+        echo
+        echo "No arguments supplied, you must provide the dispenser ID at the end of the curl line"
+        exit 1
+    fi
+    nodered_install $1
 else
     echo "Installation only works from AWS Cloud9 Instance"
 fi
